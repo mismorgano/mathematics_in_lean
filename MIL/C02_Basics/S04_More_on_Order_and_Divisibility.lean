@@ -38,14 +38,110 @@ example : min a b = min b a := by
     apply min_le_right
     apply min_le_left
 
+-- first proof: using quantifier
 example : max a b = max b a := by
-  sorry
+  have h: ∀ x y : ℝ , max x y <= max y x := by
+    intro x y
+    apply max_le
+    apply le_max_right
+    apply le_max_left
+  apply le_antisymm
+  apply h
+  apply h
+
+-- second proof
+example : max a b = max b a := by
+  apply le_antisymm
+  repeat
+    apply max_le
+    apply le_max_right
+    apply le_max_left
+
+-- apparently we have min_assoc which is the assertion
+-- So we're gonna use the above and name a theorem for them ir order to use
+-- it clearly is about commutativity so we name it that way but with a _ to differentiate with the surely one in the Mathlib
+theorem min_comm_ {a b :ℝ } : min a b = min b a := by
+  apply le_antisymm
+  repeat
+    apply le_min
+    apply min_le_right
+    apply min_le_left
+
+#check min_eq_iff
+
+
+theorem min_eq {a : ℝ } : min a a = a := by
+  apply le_antisymm
+  apply min_le_left
+  apply le_min
+  apply le_refl
+  apply le_refl
+-- theorem min_le {a b : ℝ }: a <= c -> b <= c -> min a b <= c := by
+
+--   rw [min_le_min a b min_eq]
+
+#check min_le_min
+
 example : min (min a b) c = min a (min b c) := by
-  sorry
+  have h₁ : ∀ x y z : ℝ, min (min x y) z ≤ x := by
+    intro x y z
+    apply le_trans
+    apply min_le_left (min x y)
+    apply min_le_left
+  have h₂ : ∀ x y z : ℝ, min (min x y) z ≤ y := by
+    intro x y z
+    apply le_trans
+    apply min_le_left (min x y)
+    apply min_le_right
+
+  apply le_antisymm
+  . show min (min a b) c ≤ min a (min b c)
+    apply le_min
+    . apply h₁
+    . apply le_min
+      . apply h₂
+      . apply min_le_right
+  . show min a (min b c) ≤ min (min a b) c
+    apply le_min
+    . apply le_min
+      . apply min_le_left
+      . apply le_trans
+        apply min_le_right
+        apply min_le_left
+    . apply le_trans
+      apply min_le_right
+      apply min_le_right
+
+-- example : min (min a b) c = min a (min b c) := by
+--   apply le_antisymm
+--   repeat
+--     apply le_min
+--     . show min (min a b) c ≤ a
+--       -- apply min_le_left a b
+
+--     --   . apply min_le_left
+--     --   . apply min_le_left
+--     . show min (min a b) c ≤ min b c
+--     --   apply
+
+--       -- . apply min_le_left
+--       -- apply min_le_left
+--       -- . apply
+
+
 theorem aux : min a b + c ≤ min (a + c) (b + c) := by
-  sorry
+  apply le_min
+  . apply add_le_add_right
+    apply min_le_left
+  . apply add_le_add_right
+    apply min_le_right
+
+#check add_neg_cancel_right
 example : min a b + c = min (a + c) (b + c) := by
-  sorry
+  apply le_antisymm
+  . apply aux
+
+
 #check (abs_add : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
 
 example : |a| - |b| ≤ |a - b| :=
@@ -80,5 +176,3 @@ variable (m n : ℕ)
 example : Nat.gcd m n = Nat.gcd n m := by
   sorry
 end
-
-
