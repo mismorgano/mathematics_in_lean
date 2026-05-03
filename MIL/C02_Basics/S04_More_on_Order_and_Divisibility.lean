@@ -140,12 +140,62 @@ theorem aux : min a b + c ≤ min (a + c) (b + c) := by
 example : min a b + c = min (a + c) (b + c) := by
   apply le_antisymm
   . apply aux
+  -- . apply aux min (a + c) (b + c)  + -c
+  -- . rw [← add_zero (min (a + c) (b + c))]
+  --   rw [← add_neg_cancel c]
+  --   rw [← add_assoc]
+  -- the above does the same as the bottom
+  . rw [← neg_add_cancel_right (min (a + c) (b + c)) c]
+    apply add_le_add_right
+    nth_rw 2 [← add_neg_cancel_right a c]
+    nth_rw 2 [← add_neg_cancel_right b c]
+    apply aux (a + c) (b + c) (-c)
+
+    -- linarith [aux (a + c) (b + c) (-c)]
+
+-- apparently add_neg_cancel_right, linarith and aux are enough
+example : min a b + c = min (a + c) (b + c) := by
+  apply le_antisymm
+  . apply aux
+  . nth_rw 2 [← add_neg_cancel_right a c]
+    nth_rw 2 [← add_neg_cancel_right b c]
+    linarith [aux (a + c) (b + c) (-c)]
+
 
 
 #check (abs_add : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
 
+
+#check add_sub_cancel_right
+
+-- first proof
 example : |a| - |b| ≤ |a - b| :=
-  sorry
+  calc
+    |a| - |b| = |a - b + b| - |b| := by
+      rw [sub_add_cancel]
+    _ ≤ |a - b| + |b| - |b| := by
+      apply add_le_add_right
+      apply abs_add (a - b ) b
+    _ = |a - b| := by ring
+
+#check sub_add_cancel
+-- second proof
+example : |a| - |b| ≤ |a - b| := by
+  have h: |a| ≤ |a - b| + |b| := by -- (sub_add_cancel a b) abs_add
+    nth_rw 1 [← sub_add_cancel a b]
+    apply abs_add (a-b) b
+    -- rw [sub_add_cancel a b]
+  rw [← sub_add_cancel |a| |b|]
+  linarith
+
+
+-- third proof
+example : |a| - |b| ≤ |a - b| := by
+  have h := abs_add (a - b) b
+  nth_rw 1 [← sub_add_cancel a b]
+  linarith
+
+
 end
 
 section
