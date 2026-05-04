@@ -192,7 +192,7 @@ example : |a| - |b| ≤ |a - b| := by
 -- third proof
 example : |a| - |b| ≤ |a - b| := by
   have h := abs_add (a - b) b
-  nth_rw 1 [← sub_add_cancel a b]
+  rw [sub_add_cancel a b] at h
   linarith
 
 
@@ -212,7 +212,14 @@ example : x ∣ x ^ 2 := by
   apply dvd_mul_left
 
 example (h : x ∣ w) : x ∣ y * (x * z) + x ^ 2 + w ^ 2 := by
-  sorry
+  apply dvd_add
+  . apply dvd_add
+    . apply dvd_mul_of_dvd_right
+      apply dvd_mul_right -- why isn't it inconsistent?? why right if x is left in the expression x*z
+    . apply dvd_mul_left
+  . apply dvd_trans h
+    apply dvd_mul_left
+
 end
 
 section
@@ -224,5 +231,10 @@ variable (m n : ℕ)
 #check (Nat.lcm_zero_left n : Nat.lcm 0 n = 0)
 
 example : Nat.gcd m n = Nat.gcd n m := by
-  sorry
+  apply dvd_antisymm
+  repeat
+    apply Nat.dvd_gcd
+    apply Nat.gcd_dvd_right
+    apply Nat.gcd_dvd_left
+-- very analogous to prove the commutativity of min a b = min b a
 end
